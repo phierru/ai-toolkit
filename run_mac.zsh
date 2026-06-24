@@ -163,4 +163,15 @@ export PATH="$NODE_DIR/bin:$VENV_DIR/bin:$PATH"
 echo ""
 echo "Starting UI..."
 cd "$SCRIPT_DIR/ui"
-npm run build_and_start
+NPM_CLI="$NODE_DIR/lib/node_modules/npm/bin/npm-cli.js"
+
+# Native addons are tied to Node's ABI. Rebuild macstats with the same
+# portable Node.js version this launcher uses if another Node version touched it.
+if [[ -d node_modules/macstats ]]; then
+    if ! node -e "require('macstats/build/Release/smc.node')" >/dev/null 2>&1; then
+        echo "Rebuilding macstats for $(node --version) (NODE_MODULE_VERSION $(node -p 'process.versions.modules'))..."
+        PATH="$NODE_DIR/bin:$PATH" "$NODE_BIN" "$NPM_CLI" rebuild macstats
+    fi
+fi
+
+PATH="$NODE_DIR/bin:$PATH" "$NODE_BIN" "$NPM_CLI" run build_and_start

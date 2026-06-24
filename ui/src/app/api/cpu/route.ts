@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import si from 'systeminformation';
-import { createRequire } from 'module';
 import os from 'os';
 import { CpuInfo } from '@/types';
+import { loadMacstats } from '@/server/macstats';
 
 const isMac = os.platform() === 'darwin';
 
@@ -13,8 +13,7 @@ export async function GET() {
 
     if (isMac) {
       try {
-        const nativeRequire = createRequire(import.meta.url);
-        const ms = nativeRequire('macstats') as any;
+        const ms = loadMacstats();
         const ramData = ms.getRAMUsageSync();
         const cpuData = ms.getCpuDataSync();
 

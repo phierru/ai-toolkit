@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
-import { createRequire } from 'module';
 import os from 'os';
+import { loadMacstats } from '@/server/macstats';
 
 const execAsync = promisify(exec);
 
@@ -47,9 +47,7 @@ async function getMacGpuInfo(): Promise<MacGpuResult | null> {
     let memTotal = memoryTotal;
 
     try {
-      // Use createRequire to hide from webpack static analysis so it doesn't fail on non-mac platforms
-      const nativeRequire = createRequire(import.meta.url);
-      const ms = nativeRequire('macstats') as any;
+      const ms = loadMacstats();
 
       try {
         const gpuData = ms.getGpuDataSync();
@@ -248,4 +246,3 @@ async function getGpuStats(isWindows: boolean) {
 
   return gpus;
 }
-
